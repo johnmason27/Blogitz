@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Blogitz</string>
+    <string name="search_menu_item">Search</string>
+    <string name="content_description_search_menu_item">Search for blogs</string>
+    <string name="select_all_menu_item">Select All</string>
+    <string name="content_description_select_all_menu_item">Select All Blogs</string>
+    <string name="create_blog_menu_item">Create Blog</string>
+    <string name="content_description_create_blog_menu_item">Search for blogs</string>
+    <string name="blog_title">Blog Title</string>
+    <string name="blog_body">Blog Body</string>
+    <string name="blog_title_label">Title</string>
+    <string name="blog_body_label">Body</string>
+    <string name="edit_menu_item">Edit</string>
+    <string name="content_description_edit_menu_item">Edit a post</string>
+    <string name="title_prompt">Enter a title</string>
+    <string name="contents_prompt">Enter contents</string>
+    <string name="publish_menu_item">Publish</string>
+    <string name="content_description_publish_menu_item">Publish to Twitter</string>
+    <string name="share_via_email_menu_item">Share via email</string>
+    <string name="content_description_share_via_email_menu_item">Share blog via email</string>
+    <string name="delete_menu_item">Delete</string>
+    <string name="content_description_delete_menu_item">Delete blog</string>
+    <string name="blog_select_photo_button_text">Select photo</string>
+</resources>
