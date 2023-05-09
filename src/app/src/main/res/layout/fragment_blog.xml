@@ -17,24 +17,32 @@
                 style="@style/TextAppearance.Material3.TitleLarge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/blog_title_label" />
+                android:text="@string/blog_title_label"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp" />
             <EditText
                 style="@style/ThemeOverlay.Material3.TextInputEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/blog_title_edit_text"
-                android:hint="@string/title_prompt" />
+                android:hint="@string/title_prompt"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp" />
             <com.google.android.material.textview.MaterialTextView
                 style="@style/TextAppearance.Material3.TitleLarge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/blog_body_label" />
+                android:text="@string/blog_body_label"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp" />
             <EditText
                 style="@style/ThemeOverlay.Material3.TextInputEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/blog_body_edit_text"
-                android:hint="@string/contents_prompt"/>
+                android:hint="@string/contents_prompt"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp" />
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -49,11 +57,12 @@
                     android:text="@string/blog_select_photo_button_text"/>
                 <ImageView
                     android:id="@+id/blog_image_view"
-                    android:layout_width="300dp"
+                    android:layout_width="350dp"
                     android:layout_height="300dp"
                     android:cropToPadding="true"
                     android:background="@android:color/darker_gray"
-                    android:scaleType="centerInside" />
+                    android:scaleType="centerInside"
+                    android:src="@drawable/image_holder" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

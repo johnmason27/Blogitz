@@ -183,9 +183,7 @@ public class BlogFragment extends Fragment {
     }
 
     private void updatePhotoView() {
-        if (this.photoFile == null || !this.photoFile.exists()) {
-            this.blogPhotoView.setImageDrawable(null);
-        } else {
+        if (getActivity() != null && this.photoFile != null && this.photoFile.exists()) {
             Bitmap bitmap = PictureUtils.getScaledBitmap(this.photoFile.getPath(), getActivity());
             this.blogPhotoView.setImageBitmap(bitmap);
         }

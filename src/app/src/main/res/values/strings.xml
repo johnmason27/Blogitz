@@ -4,6 +4,8 @@
     <string name="content_description_search_menu_item">Search for blogs</string>
     <string name="select_all_menu_item">Select All</string>
     <string name="content_description_select_all_menu_item">Select All Blogs</string>
+    <string name="deselect_all_menu_item">Deselect All</string>
+    <string name="content_description_deselect_all_menu_item">Deselect All Blogs</string>
     <string name="create_blog_menu_item">Create Blog</string>
     <string name="content_description_create_blog_menu_item">Search for blogs</string>
     <string name="blog_title">Blog Title</string>
@@ -20,5 +22,8 @@
     <string name="content_description_share_via_email_menu_item">Share blog via email</string>
     <string name="delete_menu_item">Delete</string>
     <string name="content_description_delete_menu_item">Delete blog</string>
+    <string name="delete_all_menu_item">Delete All</string>
+    <string name="content_description_delete_all_menu_item">Delete All blog</string>
     <string name="blog_select_photo_button_text">Select photo</string>
+    <string name="search_hint">Search...</string>
 </resources>
