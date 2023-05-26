@@ -17,7 +17,6 @@ public class BlogCursorWrapper extends CursorWrapper {
         String title = getString(getColumnIndex(BlogitzDbSchema.BlogTable.Cols.TITLE));
         String body = getString(getColumnIndex(BlogitzDbSchema.BlogTable.Cols.BODY));
 
-        Blog blog = new Blog(UUID.fromString(uuidString), title, body);
-        return blog;
+        return new Blog(UUID.fromString(uuidString), title, body);
     }
 }

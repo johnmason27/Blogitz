@@ -1,20 +1,17 @@
 package com.jm.blogitz.models;
 
+import android.app.Activity;
+import android.widget.Toast;
+
 import java.util.UUID;
 
 public class Blog {
-    private UUID id;
+    private final UUID id;
     private String title;
     private String body;
 
     public Blog(UUID id, String title, String body) {
         this.id = id;
-        this.title = title;
-        this.body = body;
-    }
-
-    public Blog(String title, String body) {
-        this.id = UUID.randomUUID();
         this.title = title;
         this.body = body;
     }
@@ -28,9 +25,6 @@ public class Blog {
     }
 
     public String getTitle() {
-        if (this.title == null || this.title.equals("")) {
-            return "Empty Title";
-        }
         return this.title;
     }
 
@@ -39,9 +33,6 @@ public class Blog {
     }
 
     public String getBody() {
-        if (this.body == null || this.body.equals("")) {
-            return "Empty Body";
-        }
         return this.body;
     }
 
@@ -51,5 +42,21 @@ public class Blog {
 
     public String getPhotoFilename() {
         return "IMG_" + this.getId().toString() + ".jpg";
+    }
+
+    public void validateBlog(Activity activity) {
+        boolean isTitleEmpty = this.getTitle() == null || this.getTitle().equals("");
+        boolean isBodyEmpty = this.getBody() == null || this.getBody().equals("");
+        if (isTitleEmpty && isBodyEmpty) {
+            Toast.makeText(activity, "Your Blog Title and Body shouldn't be empty. Setting to default values.", Toast.LENGTH_SHORT).show();
+            this.setTitle("Empty title...");
+            this.setBody("Empty body...");
+        } else if (isTitleEmpty) {
+            Toast.makeText(activity, "Your Blog Title shouldn't be empty. Setting to default value.", Toast.LENGTH_SHORT).show();
+            this.setTitle("Empty title...");
+        } else if (isBodyEmpty) {
+            Toast.makeText(activity, "Your Blog Body shouldn't be empty. Setting to default value.", Toast.LENGTH_SHORT).show();
+            this.setBody("Empty body...");
+        }
     }
 }

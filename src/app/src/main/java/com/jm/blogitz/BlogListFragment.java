@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,6 +24,7 @@ import com.jm.blogitz.models.Blog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class BlogListFragment extends Fragment {
     private RecyclerView blogRecyclerView;
@@ -34,7 +36,7 @@ public class BlogListFragment extends Fragment {
     private boolean multiSelectActive = false;
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.top_app_bar, menu);
 
@@ -45,58 +47,24 @@ public class BlogListFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.create_blog_menu_item:
-                Blog blog = new Blog();
-                BlogLab.get(getActivity()).addBlog(blog);
-                Intent intent = BlogPagerActivity.newIntent(getActivity(), blog.getId());
-                startActivity(intent);
-                return true;
-            case R.id.select_all_menu_item:
-                if (item.getTitle().equals(getString(R.string.select_all_menu_item))) {
-                    for (BlogHolder holder: this.allBlogHolders) {
-                        int color = getResources()
-                                .getColor(R.color.selection, getContext().getTheme());
-                        holder.itemView.setBackgroundColor(color);
-                        holder.selected = true;
+        int itemId = item.getItemId();
+        if (itemId == R.id.create_blog_menu_item) {
+            Blog blog = new Blog();
+            BlogLab.get(getActivity()).addBlog(blog);
 
-                        if (!this.selectedBlogs.contains(holder)) {
-                            this.selectedBlogs.add(holder);
-                        }
-                    }
-
-                    item.setTitle(R.string.deselect_all_menu_item);
-                    this.deleteAllMenuItem.setVisible(true);
-                    this.multiSelectActive = true;
-                } else {
-                    for (BlogHolder holder: this.allBlogHolders) {
-                        holder.itemView.setBackgroundColor(Color.TRANSPARENT);
-                        holder.selected = false;
-                        this.selectedBlogs.add(holder);
-                    }
-
-                    item.setTitle(R.string.select_all_menu_item);
-                    this.deleteAllMenuItem.setVisible(false);
-                    this.multiSelectActive = false;
-                }
-                return true;
-            case R.id.delete_all_menu_item:
-                for (BlogHolder holder : this.selectedBlogs) {
-                    BlogLab.get(getContext()).deleteBlog(holder.blog);
-                }
-
-                this.updateUI();
-                this.selectAllMenuItem.setTitle(R.string.select_all_menu_item);
-                this.multiSelectActive = false;
-                this.selectedBlogs = new ArrayList<>();
-                this.allBlogHolders = new ArrayList<>();
-                return true;
-            case R.id.search_menu_item:
-                Intent searchIntent = SearchListActivity.newIntent(getActivity());
-                startActivity(searchIntent);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            this.dispatchBlogPagerIntent(blog.getId());
+            return true;
+        } else if (itemId == R.id.select_all_menu_item) {
+            this.toggleSelectAll(item);
+            return true;
+        } else if (itemId == R.id.delete_all_menu_item) {
+            this.dispatchDeleteAllAction();
+            return true;
+        } else if (itemId == R.id.search_menu_item) {
+            this.dispatchSearchIntent();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -145,9 +113,65 @@ public class BlogListFragment extends Fragment {
         }
     }
 
+    private void dispatchBlogPagerIntent(UUID blogId) {
+        Intent intent = BlogPagerActivity.newIntent(getActivity(), blogId);
+        startActivity(intent);
+    }
+
+    private void toggleSelectAll(MenuItem item) {
+        if (item.getTitle().equals(getString(R.string.select_all_menu_item))) {
+            for (BlogHolder holder: this.allBlogHolders) {
+                ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
+                        .toBuilder()
+                        .setAllCorners(CornerFamily.CUT, 0)
+                        .build();
+                MaterialShapeDrawable shapeDrawable = new MaterialShapeDrawable(shapeAppearanceModel);
+                shapeDrawable.setFillColor(ContextCompat.getColorStateList(requireContext(), R.color.selection));
+                shapeDrawable.setStroke(2.0f, ContextCompat.getColor(requireContext(), R.color.white));
+                holder.itemView.setBackground(shapeDrawable);
+                holder.selected = true;
+
+                if (!this.selectedBlogs.contains(holder)) {
+                    this.selectedBlogs.add(holder);
+                }
+            }
+
+            item.setTitle(R.string.deselect_all_menu_item);
+            this.deleteAllMenuItem.setVisible(true);
+            this.multiSelectActive = true;
+        } else {
+            for (BlogHolder holder: this.allBlogHolders) {
+                holder.itemView.setBackgroundColor(Color.TRANSPARENT);
+                holder.selected = false;
+                this.selectedBlogs.add(holder);
+            }
+
+            item.setTitle(R.string.select_all_menu_item);
+            this.deleteAllMenuItem.setVisible(false);
+            this.multiSelectActive = false;
+        }
+    }
+
+    private void dispatchDeleteAllAction() {
+        for (BlogHolder holder : this.selectedBlogs) {
+            BlogLab.get(getContext()).deleteBlog(holder.blog);
+        }
+
+        this.updateUI();
+        this.selectAllMenuItem.setTitle(R.string.select_all_menu_item);
+        this.multiSelectActive = false;
+        this.selectedBlogs = new ArrayList<>();
+        this.allBlogHolders = new ArrayList<>();
+    }
+
+    private void dispatchSearchIntent() {
+        Intent searchIntent = SearchListActivity.newIntent(getActivity());
+        startActivity(searchIntent);
+    }
+
     private class BlogHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        private MaterialTextView titleTextView;
-        private MaterialTextView bodyTextView;
+        private final MaterialTextView titleTextView;
+        private final MaterialTextView bodyTextView;
         private Blog blog;
         private boolean selected;
 
@@ -194,17 +218,13 @@ public class BlogListFragment extends Fragment {
             this.selected = !this.selected;
             if (this.selected) {
                 selectedBlogs.add(this);
-//                int color = getResources()
-//                        .getColor(R.color.selection, getContext().getTheme());
-//                itemView.setBackgroundColor(color);
-
                 ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
                         .toBuilder()
                         .setAllCorners(CornerFamily.CUT, 0)
                         .build();
                 MaterialShapeDrawable shapeDrawable = new MaterialShapeDrawable(shapeAppearanceModel);
-                shapeDrawable.setFillColor(ContextCompat.getColorStateList(getContext(), R.color.selection));
-                shapeDrawable.setStroke(2.0f, ContextCompat.getColor(getContext(), R.color.white));
+                shapeDrawable.setFillColor(ContextCompat.getColorStateList(requireContext(), R.color.selection));
+                shapeDrawable.setStroke(2.0f, ContextCompat.getColor(requireContext(), R.color.white));
                 itemView.setBackground(shapeDrawable);
             } else {
                 selectedBlogs.remove(this);
@@ -233,8 +253,9 @@ public class BlogListFragment extends Fragment {
             this.blogs = blogs;
         }
 
+        @NonNull
         @Override
-        public BlogHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BlogHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View view = layoutInflater.inflate(R.layout.list_item_blog, parent, false);
 

@@ -14,13 +14,12 @@ public class BlogBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + BlogitzDbSchema.BlogTable.TABLE_NAME + "(" +
-                " _id integer PRIMARY KEY AUTOINCREMENT, " +
-                BlogitzDbSchema.BlogTable.Cols.UUID + ", " +
-                BlogitzDbSchema.BlogTable.Cols.TITLE + ", " +
-                BlogitzDbSchema.BlogTable.Cols.BODY +
-                ")"
-        );
+        String createTableSql = String.format("CREATE TABLE %s( _id integer PRIMARY KEY AUTOINCREMENT, %s, %s, %s)",
+                BlogitzDbSchema.BlogTable.TABLE_NAME,
+                BlogitzDbSchema.BlogTable.Cols.UUID,
+                BlogitzDbSchema.BlogTable.Cols.TITLE,
+                BlogitzDbSchema.BlogTable.Cols.BODY);
+        db.execSQL(createTableSql);
     }
 
     @Override

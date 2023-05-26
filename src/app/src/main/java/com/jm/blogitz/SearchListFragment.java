@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,11 +25,10 @@ import java.util.List;
 public class SearchListFragment extends Fragment {
     private RecyclerView blogRecyclerView;
     private BlogAdapter blogAdapter;
-    private EditText searchEditText;
     private String previousText;
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -45,8 +45,8 @@ public class SearchListFragment extends Fragment {
         this.blogRecyclerView = view.findViewById(R.id.blog_recycler_view);
         this.blogRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        this.searchEditText = view.findViewById(R.id.search_edit_text);
-        this.searchEditText.addTextChangedListener(new TextWatcher() {
+        EditText searchEditText = view.findViewById(R.id.search_edit_text);
+        searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -89,8 +89,8 @@ public class SearchListFragment extends Fragment {
     }
 
     private class BlogHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private MaterialTextView titleTextView;
-        private MaterialTextView bodyTextView;
+        private final MaterialTextView titleTextView;
+        private final MaterialTextView bodyTextView;
         private Blog blog;
 
         public BlogHolder(View itemView) {
@@ -124,8 +124,9 @@ public class SearchListFragment extends Fragment {
             this.blogs = blogs;
         }
 
+        @NonNull
         @Override
-        public BlogHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BlogHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View view = layoutInflater.inflate(R.layout.list_item_blog, parent, false);
 
@@ -145,7 +146,7 @@ public class SearchListFragment extends Fragment {
 
         private void filterBlogs(String searchText) {
             if (searchText.equals("")) {
-                blogAdapter.setBlogs(BlogLab.get(getContext()).getBlogs());
+                this.setBlogs(BlogLab.get(getContext()).getBlogs());
             } else {
                 ArrayList<Blog> filteredBlogs = new ArrayList<>();
                 for (Blog blog: this.blogs) {
@@ -153,10 +154,10 @@ public class SearchListFragment extends Fragment {
                         filteredBlogs.add(blog);
                     }
                 }
-                blogAdapter.setBlogs(filteredBlogs);
+                this.setBlogs(filteredBlogs);
             }
 
-            blogAdapter.notifyDataSetChanged();
+            this.notifyDataSetChanged();
         }
     }
 }

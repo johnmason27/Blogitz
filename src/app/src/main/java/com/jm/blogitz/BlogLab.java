@@ -17,12 +17,12 @@ import java.util.UUID;
 
 public class BlogLab {
     private static BlogLab blogLab;
-    private Context context;
+    private final Context context;
     private static SQLiteDatabase database;
 
     private BlogLab(Context context) {
         this.context = context.getApplicationContext();
-        this.database = new BlogBaseHelper(this.context).getWritableDatabase();
+        database = new BlogBaseHelper(this.context).getWritableDatabase();
     }
 
     public static BlogLab get(Context context) {
@@ -35,47 +35,41 @@ public class BlogLab {
 
     public List<Blog> getBlogs() {
         List<Blog> blogs = new ArrayList<>();
-        BlogCursorWrapper cursor = this.queryBlogs(null, null);
 
-        try {
+        try (BlogCursorWrapper cursor = this.queryBlogs(null, null)) {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 blogs.add(cursor.getBlog());
                 cursor.moveToNext();
             }
-        } finally {
-            cursor.close();
         }
 
         return blogs;
     }
 
     public void addBlog(Blog blog) {
-        ContentValues values = this.getContentValues(blog);
-        this.database.insert(BlogitzDbSchema.BlogTable.TABLE_NAME, null, values);
+        ContentValues values = getContentValues(blog);
+        database.insert(BlogitzDbSchema.BlogTable.TABLE_NAME, null, values);
     }
 
     public Blog getBlog(UUID id) {
-        BlogCursorWrapper cursor = this.queryBlogs(
-                BlogitzDbSchema.BlogTable.Cols.UUID + " =?",
-                new String[] { id.toString() }
-        );
 
-        try {
+        try (BlogCursorWrapper cursor = this.queryBlogs(
+                BlogitzDbSchema.BlogTable.Cols.UUID + " =?",
+                new String[]{id.toString()}
+        )) {
             if (cursor.getCount() == 0) {
                 return null;
             }
             cursor.moveToFirst();
             return cursor.getBlog();
-        } finally {
-            cursor.close();
         }
     }
 
     public void updateBlog(Blog blog) {
         String uuidString = blog.getId().toString();
-        ContentValues values = this.getContentValues(blog);
-        this.database.update(
+        ContentValues values = getContentValues(blog);
+        database.update(
                 BlogitzDbSchema.BlogTable.TABLE_NAME,
                 values,
                 BlogitzDbSchema.BlogTable.Cols.UUID + " = ?",
@@ -85,7 +79,7 @@ public class BlogLab {
 
     public void deleteBlog(Blog blog) {
         String uuidString = blog.getId().toString();
-        this.database.delete(
+        database.delete(
                 BlogitzDbSchema.BlogTable.TABLE_NAME,
                 BlogitzDbSchema.BlogTable.Cols.UUID + " = ?",
                 new String[] { uuidString }
@@ -98,14 +92,14 @@ public class BlogLab {
     }
 
     private BlogCursorWrapper queryBlogs(String whereClause, String[] whereArgs) {
-        Cursor cursor = this.database.query(
+        Cursor cursor = database.query(
                 BlogitzDbSchema.BlogTable.TABLE_NAME,
-                null, // Columns - null selects all columns
+                null,
                 whereClause,
                 whereArgs,
-                null, // groupBy
-                null, // having
-                null // orderBy
+                null,
+                null,
+                null
         );
         return new BlogCursorWrapper(cursor);
     }

@@ -2,15 +2,11 @@ package com.jm.blogitz;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -21,12 +17,14 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textview.MaterialTextView;
 import com.jm.blogitz.models.Blog;
 import com.jm.blogitz.utils.FileUtils;
 import com.jm.blogitz.utils.PictureUtils;
@@ -39,12 +37,7 @@ import java.util.UUID;
 
 public class BlogFragment extends Fragment {
     private static final String ARG_BLOG_ID = "blog_id";
-    private static final int REQUEST_TAKE_PHOTO = 1;
-    private static final int REQUEST_SELECT_PHOTO = 2;
     private Blog blog;
-    private EditText titleTextView;
-    private EditText bodyTextView;
-    private MaterialButton selectPhotoButton;
     private File photoFile;
     private ImageView blogPhotoView;
 
@@ -59,6 +52,9 @@ public class BlogFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() == null) {
+            throw new NullPointerException();
+        }
         UUID blogId = (UUID) getArguments().getSerializable(ARG_BLOG_ID);
         this.blog = BlogLab.get(getActivity()).getBlog(blogId);
         this.photoFile = BlogLab.get(getActivity()).getPhotoFile(this.blog);
@@ -67,6 +63,8 @@ public class BlogFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+
+        this.blog.validateBlog(getActivity());
         BlogLab.get(getActivity()).updateBlog(this.blog);
     }
 
@@ -74,9 +72,9 @@ public class BlogFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_blog, container, false);
 
-        this.titleTextView = view.findViewById(R.id.blog_title_edit_text);
-        this.titleTextView.setText(this.blog.getTitle());
-        this.titleTextView.addTextChangedListener(new TextWatcher() {
+        EditText titleTextView = view.findViewById(R.id.blog_title_edit_text);
+        titleTextView.setText(this.blog.getTitle());
+        titleTextView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -91,9 +89,9 @@ public class BlogFragment extends Fragment {
             }
         });
 
-        this.bodyTextView = view.findViewById(R.id.blog_body_edit_text);
-        this.bodyTextView.setText(this.blog.getBody());
-        this.bodyTextView.addTextChangedListener(new TextWatcher() {
+        EditText bodyTextView = view.findViewById(R.id.blog_body_edit_text);
+        bodyTextView.setText(this.blog.getBody());
+        bodyTextView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -108,8 +106,8 @@ public class BlogFragment extends Fragment {
             }
         });
 
-        this.selectPhotoButton = view.findViewById(R.id.blog_select_photo_button);
-        this.selectPhotoButton.setOnClickListener(v -> dispatchTakePhotoIntent());
+        MaterialButton selectPhotoButton = view.findViewById(R.id.blog_select_photo_button);
+        selectPhotoButton.setOnClickListener(v -> dispatchTakePhotoIntent());
 
         this.blogPhotoView = view.findViewById(R.id.blog_image_view);
         this.updatePhotoView();
@@ -117,69 +115,97 @@ public class BlogFragment extends Fragment {
         return view;
     }
 
+    public void openTakePhotoActivityForResult() {
+        Intent captureImageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Uri photoFileUri = FileProvider.getUriForFile(requireActivity(), "com.jm.blogitz.fileprovider", this.photoFile);
+        captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoFileUri);
+        List<ResolveInfo> cameraActivities = requireActivity()
+                .getPackageManager()
+                .queryIntentActivities(captureImageIntent, PackageManager.MATCH_DEFAULT_ONLY);
+
+        for (ResolveInfo activity : cameraActivities) {
+            requireActivity().grantUriPermission(activity.activityInfo.packageName, photoFileUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        }
+
+        takePhotoResultLauncher.launch(captureImageIntent);
+    }
+
+    public void openChooseFromGalleryActivityForResult() {
+        Intent selectPhotoIntent = new Intent();
+        selectPhotoIntent.setType("image/*");
+        selectPhotoIntent.setAction(Intent.ACTION_GET_CONTENT);
+
+        chooseFromGalleryResultLauncher.launch(selectPhotoIntent);
+    }
+
+    ActivityResultLauncher<Intent> takePhotoResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Uri uri = FileProvider.getUriForFile(requireActivity(), "com.jm.blogitz.fileprovider", photoFile);
+                        requireActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        updatePhotoView();
+                    }
+                }
+            });
+
+    ActivityResultLauncher<Intent> chooseFromGalleryResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data == null) {
+                            return;
+                        }
+
+                        try {
+                            Uri uri = data.getData();
+                            File file = FileUtils.from(requireActivity(), uri);
+                            Bitmap bitmap = PictureUtils.getScaledBitmap(file.getPath(), requireActivity());
+                            blogPhotoView.setImageBitmap(bitmap);
+
+                            FileOutputStream fileOutputStream = new FileOutputStream(photoFile);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+
     private void dispatchTakePhotoIntent() {
-//        PackageManager packageManager = getActivity().getPackageManager();
-//        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        boolean canTakePhoto = this.photoFile != null && captureImage.resolveActivity(packageManager) != null;
+        PackageManager packageManager = requireActivity().getPackageManager();
+        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (captureImage.resolveActivity(packageManager) != null) {
+
+        }
+        boolean canTakePhoto = this.photoFile != null && captureImage.resolveActivity(packageManager) != null;
 
         final String[] options = { "Take Photo", "Choose from Gallery", "Cancel" };
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
         builder.setTitle("Select Photo");
         builder.setItems(options, (dialog, item) -> {
-            if (options[item].equals("Take Photo")) {
-                Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                Uri photoFileUri = FileProvider.getUriForFile(getActivity(), "com.jm.blogitz.fileprovider", this.photoFile);
-                captureImage.putExtra(MediaStore.EXTRA_OUTPUT, photoFileUri);
-                List<ResolveInfo> cameraActivities = getActivity()
-                        .getPackageManager()
-                        .queryIntentActivities(captureImage, PackageManager.MATCH_DEFAULT_ONLY);
-
-                for (ResolveInfo activity: cameraActivities) {
-                    getActivity().grantUriPermission(activity.activityInfo.packageName, photoFileUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                }
-
-                startActivityForResult(captureImage, REQUEST_TAKE_PHOTO);
-            } else if (options[item].equals("Choose from Gallery")) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Photo"), REQUEST_SELECT_PHOTO);
-            } else if (options[item].equals("Cancel")) {
-                dialog.dismiss();
+            switch (options[item]) {
+                case "Take Photo":
+                    this.openTakePhotoActivityForResult();
+                    break;
+                case "Choose from Gallery":
+                    this.openChooseFromGalleryActivityForResult();
+                    break;
+                case "Cancel":
+                    dialog.dismiss();
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + options[item]);
             }
         });
         builder.show();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != Activity.RESULT_OK) {
-            return;
-        }
-
-        if (requestCode == REQUEST_TAKE_PHOTO) {
-            Uri uri = FileProvider.getUriForFile(getActivity(), "com.jm.blogitz.fileprovider", this.photoFile);
-            getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            this.updatePhotoView();
-        } else if (requestCode == REQUEST_SELECT_PHOTO) {
-            if (data == null) {
-                return;
-            }
-
-            try {
-                Uri uri = data.getData();
-                File file = FileUtils.from(getActivity(), uri);
-                Bitmap bitmap = PictureUtils.getScaledBitmap(file.getPath(), getActivity());
-                this.blogPhotoView.setImageBitmap(bitmap);
-
-                FileOutputStream fileOutputStream = new FileOutputStream(this.photoFile);
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
-                fileOutputStream.flush();
-                fileOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private void updatePhotoView() {
