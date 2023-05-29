@@ -1,6 +1,8 @@
 package com.jm.blogitz;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -121,14 +124,7 @@ public class BlogListFragment extends Fragment {
     private void toggleSelectAll(MenuItem item) {
         if (item.getTitle().equals(getString(R.string.select_all_menu_item))) {
             for (BlogHolder holder: this.allBlogHolders) {
-                ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
-                        .toBuilder()
-                        .setAllCorners(CornerFamily.CUT, 0)
-                        .build();
-                MaterialShapeDrawable shapeDrawable = new MaterialShapeDrawable(shapeAppearanceModel);
-                shapeDrawable.setFillColor(ContextCompat.getColorStateList(requireContext(), R.color.selection));
-                shapeDrawable.setStroke(2.0f, ContextCompat.getColor(requireContext(), R.color.white));
-                holder.itemView.setBackground(shapeDrawable);
+                toggleSelectionColor(holder.itemView);
                 holder.selected = true;
 
                 if (!this.selectedBlogs.contains(holder)) {
@@ -218,14 +214,7 @@ public class BlogListFragment extends Fragment {
             this.selected = !this.selected;
             if (this.selected) {
                 selectedBlogs.add(this);
-                ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
-                        .toBuilder()
-                        .setAllCorners(CornerFamily.CUT, 0)
-                        .build();
-                MaterialShapeDrawable shapeDrawable = new MaterialShapeDrawable(shapeAppearanceModel);
-                shapeDrawable.setFillColor(ContextCompat.getColorStateList(requireContext(), R.color.selection));
-                shapeDrawable.setStroke(2.0f, ContextCompat.getColor(requireContext(), R.color.white));
-                itemView.setBackground(shapeDrawable);
+                toggleSelectionColor(itemView);
             } else {
                 selectedBlogs.remove(this);
                 itemView.setBackgroundColor(Color.TRANSPARENT);
@@ -272,5 +261,19 @@ public class BlogListFragment extends Fragment {
         public int getItemCount() {
             return this.blogs.size();
         }
+    }
+
+    private void toggleSelectionColor(View itemView) {
+        ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
+                .toBuilder()
+                .setAllCorners(CornerFamily.CUT, 0)
+                .build();
+        MaterialShapeDrawable shapeDrawable = new MaterialShapeDrawable(shapeAppearanceModel);
+        Resources.Theme applicationTheme = requireActivity().getTheme();
+        ColorStateList fillColor = ResourcesCompat.getColorStateList(getResources(), R.color.selection, applicationTheme);
+        shapeDrawable.setFillColor(fillColor);
+        int borderColor = ResourcesCompat.getColor(getResources(), R.color.selection_border, requireActivity().getTheme());
+        shapeDrawable.setStroke(2.0f, borderColor);
+        itemView.setBackground(shapeDrawable);
     }
 }

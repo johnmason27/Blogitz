@@ -37,7 +37,7 @@ public class BlogPagerActivity extends AppCompatActivity {
         assert getSupportActionBar() != null;
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        int color = ResourcesCompat.getColor(getResources(), R.color.background_dark, getTheme());
+        int color = ResourcesCompat.getColor(getResources(), R.color.background, getTheme());
         ColorDrawable colorDrawable = new ColorDrawable(color);
         actionBar.setBackgroundDrawable(colorDrawable);
 

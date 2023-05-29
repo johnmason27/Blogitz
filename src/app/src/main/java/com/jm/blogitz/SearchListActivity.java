@@ -23,7 +23,7 @@ public class SearchListActivity extends AppCompatActivity {
         setContentView(R.layout.list_activity_search);
 
         ActionBar actionBar = getSupportActionBar();
-        int color = ResourcesCompat.getColor(getResources(), R.color.background_dark, getTheme());
+        int color = ResourcesCompat.getColor(getResources(), R.color.background, getTheme());
         ColorDrawable colorDrawable = new ColorDrawable(color);
         if (actionBar != null) {
             actionBar.setBackgroundDrawable(colorDrawable);

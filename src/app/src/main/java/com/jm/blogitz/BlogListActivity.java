@@ -16,7 +16,7 @@ public class BlogListActivity extends AppCompatActivity {
         setContentView(R.layout.list_activity_blog);
 
         ActionBar actionBar = getSupportActionBar();
-        int color = ResourcesCompat.getColor(getResources(), R.color.background_dark, getTheme());
+        int color = ResourcesCompat.getColor(getResources(), R.color.background, getTheme());
         ColorDrawable colorDrawable = new ColorDrawable(color);
         if (actionBar != null) {
             actionBar.setBackgroundDrawable(colorDrawable);

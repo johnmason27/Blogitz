@@ -2,6 +2,7 @@ package com.jm.blogitz;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -14,6 +15,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageView;
 
@@ -33,6 +35,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class BlogFragment extends Fragment {
@@ -185,6 +188,30 @@ public class BlogFragment extends Fragment {
                     }
                 }
             });
+
+    private Bitmap.CompressFormat getCompressFormat(Uri uri) {
+        String mimeType;
+
+        if (Objects.equals(ContentResolver.SCHEME_CONTENT, uri.getScheme())) {
+            ContentResolver contentResolver = getActivity()
+                    .getApplicationContext()
+                    .getContentResolver();
+            mimeType = contentResolver.getType(uri);
+        } else {
+            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
+        }
+
+        if (Objects.equals(mimeType, "image/jpeg")) {
+            return Bitmap.CompressFormat.JPEG;
+        }
+
+        if (Objects.equals(mimeType, "image/png")) {
+            return Bitmap.CompressFormat.PNG;
+        }
+
+        return null;
+    }
 
     private void dispatchTakePhotoIntent() {
 //        PackageManager packageManager = requireActivity().getPackageManager();
