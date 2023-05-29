@@ -26,4 +26,5 @@
     <string name="content_description_delete_all_menu_item">Delete All blog</string>
     <string name="blog_select_photo_button_text">Select photo</string>
     <string name="search_hint">Search...</string>
+    <string name="blog_photo_description">Blog\'s Photo</string>
 </resources>

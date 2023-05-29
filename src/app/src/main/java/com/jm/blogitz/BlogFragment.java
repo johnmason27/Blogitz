@@ -117,14 +117,21 @@ public class BlogFragment extends Fragment {
 
     public void openTakePhotoActivityForResult() {
         Intent captureImageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        Uri photoFileUri = FileProvider.getUriForFile(requireActivity(), "com.jm.blogitz.fileprovider", this.photoFile);
+        Uri photoFileUri = FileProvider.getUriForFile(
+                requireActivity(),
+                "com.jm.blogitz.fileprovider",
+                this.photoFile);
         captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoFileUri);
         List<ResolveInfo> cameraActivities = requireActivity()
                 .getPackageManager()
                 .queryIntentActivities(captureImageIntent, PackageManager.MATCH_DEFAULT_ONLY);
 
         for (ResolveInfo activity : cameraActivities) {
-            requireActivity().grantUriPermission(activity.activityInfo.packageName, photoFileUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            requireActivity()
+                    .grantUriPermission(
+                            activity.activityInfo.packageName,
+                            photoFileUri,
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }
 
         takePhotoResultLauncher.launch(captureImageIntent);
@@ -180,12 +187,14 @@ public class BlogFragment extends Fragment {
             });
 
     private void dispatchTakePhotoIntent() {
-        PackageManager packageManager = requireActivity().getPackageManager();
-        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (captureImage.resolveActivity(packageManager) != null) {
+//        PackageManager packageManager = requireActivity().getPackageManager();
+//        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        if (captureImage.resolveActivity(getActivity().getPackageManager()) != null) {
+//
+//        }
+//        boolean canTakePhoto = this.photoFile != null && captureImage.resolveActivity(packageManager) != null;
 
-        }
-        boolean canTakePhoto = this.photoFile != null && captureImage.resolveActivity(packageManager) != null;
+        // https://github.com/prudhvirajkumar10/imagepickerdemo/blob/master/app/src/main/java/com/example/imagepicker/MainActivity.java
 
         final String[] options = { "Take Photo", "Choose from Gallery", "Cancel" };
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
