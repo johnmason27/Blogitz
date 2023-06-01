@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_margin="10dp"
-                android:text="@string/blog_select_photo_button_text"/>
+                android:text="@string/blog_select_photo_button_text" />
             <ImageView
                 android:id="@+id/blog_image_view"
                 android:layout_width="350dp"

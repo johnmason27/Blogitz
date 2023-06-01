@@ -2,8 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="selection">#89878C</color>
-    <color name="selection_border">@color/black</color>
+    <color name="selection">#CCC2DC</color>
     <color name="background">#ECECEC</color>
     <color name="on_surface">@color/black</color>
+    <color name="button_color">#6750A4</color>
+    <color name="button_text">#F6EDFF</color>
 </resources>

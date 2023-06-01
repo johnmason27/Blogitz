@@ -1,5 +1,6 @@
 <resources>
     <style name="Theme.Blogitz" parent="Theme.Material3.Light">
         <item name="iconTint">@color/on_surface</item>
+        <item name="buttonTint">@color/button_color</item>
     </style>
 </resources>

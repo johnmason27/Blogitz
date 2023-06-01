@@ -456,8 +456,6 @@ public class BlogListFragment extends Fragment {
         Resources.Theme applicationTheme = requireActivity().getTheme();
         ColorStateList fillColor = ResourcesCompat.getColorStateList(getResources(), R.color.selection, applicationTheme);
         shapeDrawable.setFillColor(fillColor);
-        int borderColor = ResourcesCompat.getColor(getResources(), R.color.selection_border, requireActivity().getTheme());
-        shapeDrawable.setStroke(2.0f, borderColor);
         itemView.setBackground(shapeDrawable);
     }
 }
