@@ -27,4 +27,6 @@
     <string name="blog_select_photo_button_text">Select photo</string>
     <string name="search_hint">Search...</string>
     <string name="blog_photo_description">Blog\'s Photo</string>
+    <string name="deselect_selected_menu_item">Deselect Selected</string>
+    <string name="delete_selected_menu_item">Delete Selected</string>
 </resources>

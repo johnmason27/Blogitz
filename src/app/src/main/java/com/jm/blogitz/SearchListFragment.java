@@ -101,6 +101,9 @@ public class SearchListFragment extends Fragment {
                     blogAdapter.setBlogs(BlogLab.get(getContext()).getBlogs());
                 }
 
+                if (charSequence == null) {
+                    charSequence = "";
+                }
                 // Filter the blogs using the current query.
                 blogAdapter.filterBlogs(charSequence.toString());
                 previousText = charSequence.toString();

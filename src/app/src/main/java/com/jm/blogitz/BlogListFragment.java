@@ -236,14 +236,14 @@ public class BlogListFragment extends Fragment {
     private void dispatchDeleteAllAction() {
         BlogLab blogLab = BlogLab.get(requireContext());
         List<Blog> blogs = blogLab.getBlogs();
-        if (this.selectedBlogs.size() == blogs.size()) {
-            for (BlogHolder holder : this.selectedBlogs) {
-                BlogLab.get(getContext()).deleteBlog(holder.blog);
-            }
-        } else {
-            // If the pager is off the screen and Delete all is selected.
+        if (this.deleteAllMenuItem.getTitle().equals("Delete All")) {
             for (Blog blog : blogs) {
                 BlogLab.get(getContext()).deleteBlog(blog);
+            }
+        } else {
+            // Delete Selected
+            for (BlogHolder holder : this.selectedBlogs) {
+                BlogLab.get(getContext()).deleteBlog(holder.blog);
             }
         }
 
@@ -369,8 +369,8 @@ public class BlogListFragment extends Fragment {
                     deleteAllMenuItem.setTitle(R.string.delete_all_menu_item);
                 } else {
                     // If there are some selected blogs but not all set the text of the select all and delete all menu items.
-                    selectAllMenuItem.setTitle("Deselect Selected");
-                    deleteAllMenuItem.setTitle("Delete Selected");
+                    selectAllMenuItem.setTitle(R.string.deselect_selected_menu_item);
+                    deleteAllMenuItem.setTitle(R.string.delete_selected_menu_item);
                 }
 
                 // If we have a selected blog set the delete all menu item to visible.
